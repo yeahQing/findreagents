@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.dao.DetailsMapper">
+  <resultMap id="BaseResultMap" type="com.ssm.bean.Details">
+    <id column="detail_id" jdbcType="INTEGER" property="detailId" />
+    <result column="cn_name" jdbcType="VARCHAR" property="cnName" />
+    <result column="aliases_name" jdbcType="VARCHAR" property="aliasesName" />
+    <result column="structure" jdbcType="VARCHAR" property="structure" />
+    <result column="performance" jdbcType="VARCHAR" property="performance" />
+    <result column="purpose" jdbcType="VARCHAR" property="purpose" />
+    <result column="technology" jdbcType="LONGVARCHAR" property="technology" />
+    <result column="method" jdbcType="LONGVARCHAR" property="method" />
+    <result column="company" jdbcType="VARCHAR" property="company" />
+    <result column="reg_id" jdbcType="INTEGER" property="regId" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.ssm.bean.Details">
+    <result column="method" jdbcType="LONGVARCHAR" property="method" />
+  </resultMap>
+  <!-- 自定义resultMap -->
+  <resultMap type="com.ssm.bean.Details" id="WithReagentResultMap">
+  	<id column="detail_id" jdbcType="INTEGER" property="detailId" />
+    <result column="cn_name" jdbcType="VARCHAR" property="cnName" />
+    <result column="aliases_name" jdbcType="VARCHAR" property="aliasesName" />
+    <result column="structure" jdbcType="VARCHAR" property="structure" />
+    <result column="performance" jdbcType="VARCHAR" property="performance" />
+    <result column="purpose" jdbcType="VARCHAR" property="purpose" />
+    <result column="technology" jdbcType="LONGVARCHAR" property="technology" />
+    <result column="method" jdbcType="LONGVARCHAR" property="method" />
+    <result column="company" jdbcType="VARCHAR" property="company" />
+    <association property="reagent" javaType="com.ssm.bean.Reagent">
+    	<id column="reagent_id" property="reagentId"/>
+    	<result column="reagent_type" property="reagentType"/>
+    </association>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    detail_id, cn_name, aliases_name, structure, performance, purpose, technology, company, 
+    reg_id
+  </sql>
+  <sql id="Blob_Column_List">
+    method
+  </sql>
+  <sql id="WithReagent_Column_List">
+  	d.detail_id,d.cn_name,d.aliases_name,d.structure,d.performance,d.purpose,d.technology,d.method,d.company,r.reagent_type
+  </sql>
+  <!-- 根据类型查找联合查询 -->
+  <select id="selectByExampleWithReagent" resultMap="WithReagentResultMap"  parameterType="int" >
+  	select
+    <include refid="WithReagent_Column_List" />
+    FROM 
+    details_table d 
+    LEFT OUTER JOIN 
+    reagent_table r ON d.reg_id = r.reagent_id 
+    WHERE r.reagent_id = #{id}
+  </select>
+  <!-- end多表联合 -->
+  <select id="selectByExampleWithBLOBs" parameterType="com.ssm.bean.DetailsExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from details_table
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.ssm.bean.DetailsExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from details_table
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from details_table
+    where detail_id = #{detailId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from details_table
+    where detail_id = #{detailId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ssm.bean.DetailsExample">
+    delete from details_table
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ssm.bean.Details">
+    insert into details_table (detail_id, cn_name, aliases_name, 
+      structure, performance, purpose, 
+      technology, company, reg_id, 
+      method)
+    values (#{detailId,jdbcType=INTEGER}, #{cnName,jdbcType=VARCHAR}, #{aliasesName,jdbcType=VARCHAR}, 
+      #{structure,jdbcType=VARCHAR}, #{performance,jdbcType=VARCHAR}, #{purpose,jdbcType=VARCHAR}, 
+      #{technology,jdbcType=VARCHAR}, #{company,jdbcType=VARCHAR}, #{regId,jdbcType=INTEGER}, 
+      #{method,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ssm.bean.Details">
+    insert into details_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="detailId != null">
+        detail_id,
+      </if>
+      <if test="cnName != null">
+        cn_name,
+      </if>
+      <if test="aliasesName != null">
+        aliases_name,
+      </if>
+      <if test="structure != null">
+        structure,
+      </if>
+      <if test="performance != null">
+        performance,
+      </if>
+      <if test="purpose != null">
+        purpose,
+      </if>
+      <if test="technology != null">
+        technology,
+      </if>
+      <if test="company != null">
+        company,
+      </if>
+      <if test="regId != null">
+        reg_id,
+      </if>
+      <if test="method != null">
+        method,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="detailId != null">
+        #{detailId,jdbcType=INTEGER},
+      </if>
+      <if test="cnName != null">
+        #{cnName,jdbcType=VARCHAR},
+      </if>
+      <if test="aliasesName != null">
+        #{aliasesName,jdbcType=VARCHAR},
+      </if>
+      <if test="structure != null">
+        #{structure,jdbcType=VARCHAR},
+      </if>
+      <if test="performance != null">
+        #{performance,jdbcType=VARCHAR},
+      </if>
+      <if test="purpose != null">
+        #{purpose,jdbcType=VARCHAR},
+      </if>
+      <if test="technology != null">
+        #{technology,jdbcType=VARCHAR},
+      </if>
+      <if test="company != null">
+        #{company,jdbcType=VARCHAR},
+      </if>
+      <if test="regId != null">
+        #{regId,jdbcType=INTEGER},
+      </if>
+      <if test="method != null">
+        #{method,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ssm.bean.DetailsExample" resultType="java.lang.Long">
+    select count(*) from details_table
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update details_table
+    <set>
+      <if test="record.detailId != null">
+        detail_id = #{record.detailId,jdbcType=INTEGER},
+      </if>
+      <if test="record.cnName != null">
+        cn_name = #{record.cnName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.aliasesName != null">
+        aliases_name = #{record.aliasesName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.structure != null">
+        structure = #{record.structure,jdbcType=VARCHAR},
+      </if>
+      <if test="record.performance != null">
+        performance = #{record.performance,jdbcType=VARCHAR},
+      </if>
+      <if test="record.purpose != null">
+        purpose = #{record.purpose,jdbcType=VARCHAR},
+      </if>
+      <if test="record.technology != null">
+        technology = #{record.technology,jdbcType=VARCHAR},
+      </if>
+      <if test="record.company != null">
+        company = #{record.company,jdbcType=VARCHAR},
+      </if>
+      <if test="record.regId != null">
+        reg_id = #{record.regId,jdbcType=INTEGER},
+      </if>
+      <if test="record.method != null">
+        method = #{record.method,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update details_table
+    set detail_id = #{record.detailId,jdbcType=INTEGER},
+      cn_name = #{record.cnName,jdbcType=VARCHAR},
+      aliases_name = #{record.aliasesName,jdbcType=VARCHAR},
+      structure = #{record.structure,jdbcType=VARCHAR},
+      performance = #{record.performance,jdbcType=VARCHAR},
+      purpose = #{record.purpose,jdbcType=VARCHAR},
+      technology = #{record.technology,jdbcType=VARCHAR},
+      company = #{record.company,jdbcType=VARCHAR},
+      reg_id = #{record.regId,jdbcType=INTEGER},
+      method = #{record.method,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update details_table
+    set detail_id = #{record.detailId,jdbcType=INTEGER},
+      cn_name = #{record.cnName,jdbcType=VARCHAR},
+      aliases_name = #{record.aliasesName,jdbcType=VARCHAR},
+      structure = #{record.structure,jdbcType=VARCHAR},
+      performance = #{record.performance,jdbcType=VARCHAR},
+      purpose = #{record.purpose,jdbcType=VARCHAR},
+      technology = #{record.technology,jdbcType=VARCHAR},
+      company = #{record.company,jdbcType=VARCHAR},
+      reg_id = #{record.regId,jdbcType=INTEGER}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ssm.bean.Details">
+    update details_table
+    <set>
+      <if test="cnName != null">
+        cn_name = #{cnName,jdbcType=VARCHAR},
+      </if>
+      <if test="aliasesName != null">
+        aliases_name = #{aliasesName,jdbcType=VARCHAR},
+      </if>
+      <if test="structure != null">
+        structure = #{structure,jdbcType=VARCHAR},
+      </if>
+      <if test="performance != null">
+        performance = #{performance,jdbcType=VARCHAR},
+      </if>
+      <if test="purpose != null">
+        purpose = #{purpose,jdbcType=VARCHAR},
+      </if>
+      <if test="technology != null">
+        technology = #{technology,jdbcType=VARCHAR},
+      </if>
+      <if test="company != null">
+        company = #{company,jdbcType=VARCHAR},
+      </if>
+      <if test="regId != null">
+        reg_id = #{regId,jdbcType=INTEGER},
+      </if>
+      <if test="method != null">
+        method = #{method,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where detail_id = #{detailId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.ssm.bean.Details">
+    update details_table
+    set cn_name = #{cnName,jdbcType=VARCHAR},
+      aliases_name = #{aliasesName,jdbcType=VARCHAR},
+      structure = #{structure,jdbcType=VARCHAR},
+      performance = #{performance,jdbcType=VARCHAR},
+      purpose = #{purpose,jdbcType=VARCHAR},
+      technology = #{technology,jdbcType=VARCHAR},
+      company = #{company,jdbcType=VARCHAR},
+      reg_id = #{regId,jdbcType=INTEGER},
+      method = #{method,jdbcType=LONGVARCHAR}
+    where detail_id = #{detailId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ssm.bean.Details">
+    update details_table
+    set cn_name = #{cnName,jdbcType=VARCHAR},
+      aliases_name = #{aliasesName,jdbcType=VARCHAR},
+      structure = #{structure,jdbcType=VARCHAR},
+      performance = #{performance,jdbcType=VARCHAR},
+      purpose = #{purpose,jdbcType=VARCHAR},
+      technology = #{technology,jdbcType=VARCHAR},
+      company = #{company,jdbcType=VARCHAR},
+      reg_id = #{regId,jdbcType=INTEGER}
+    where detail_id = #{detailId,jdbcType=INTEGER}
+  </update>
+</mapper>
